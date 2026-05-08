@@ -107,6 +107,7 @@ body {
   text-align: center;
   padding: 54px 26px 112px;
   background: var(--overlay-grad);
+  pointer-events: none;
 }
 
 .heart-deco,

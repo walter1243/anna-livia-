@@ -11,6 +11,7 @@ const videoSceneIndex = scenes.findIndex((scene) => scene.contains(mainVideo));
 let currentScene = 0;
 let musicStartedByGesture = false;
 let wasInVideoScene = false;
+let musicShouldPlay = true;
 
 function clampScene(index) {
   return Math.max(0, Math.min(index, scenes.length - 1));
@@ -55,9 +56,10 @@ function syncScene() {
   } else {
     if (wasInVideoScene && mainVideo && !mainVideo.paused) {
       mainVideo.pause();
+      mainVideo.currentTime = 0;
     }
 
-    if (bgMusic && musicStartedByGesture) {
+    if (bgMusic && musicShouldPlay) {
       void tryPlayMusic();
     }
   }
@@ -101,7 +103,43 @@ function ensureMusicAfterGesture() {
   }
 
   musicStartedByGesture = true;
+  bgMusic.muted = false;
   void tryPlayMusic();
+}
+
+async function attemptAutoMusicStart() {
+  if (!bgMusic || !musicShouldPlay || currentScene === videoSceneIndex) {
+    return;
+  }
+
+  bgMusic.muted = false;
+  const played = await tryPlayMusic();
+  if (played) {
+    return;
+  }
+
+  bgMusic.muted = true;
+  await tryPlayMusic();
+}
+
+function installMusicUnlockListeners() {
+  const unlockMusic = () => {
+    if (!bgMusic || !musicShouldPlay || currentScene === videoSceneIndex) {
+      return;
+    }
+
+    musicStartedByGesture = true;
+    bgMusic.muted = false;
+    void tryPlayMusic();
+
+    document.removeEventListener('pointerdown', unlockMusic);
+    document.removeEventListener('touchstart', unlockMusic);
+    document.removeEventListener('keydown', unlockMusic);
+  };
+
+  document.addEventListener('pointerdown', unlockMusic, { once: true });
+  document.addEventListener('touchstart', unlockMusic, { once: true });
+  document.addEventListener('keydown', unlockMusic, { once: true });
 }
 
 if (prevButton) {
@@ -135,11 +173,14 @@ if (musicToggle) {
     }
 
     if (bgMusic.paused) {
+      musicShouldPlay = true;
       musicStartedByGesture = true;
+      bgMusic.muted = false;
       await tryPlayMusic();
       return;
     }
 
+    musicShouldPlay = false;
     bgMusic.pause();
     setMusicButtonState(false);
   });
@@ -171,3 +212,5 @@ document.addEventListener('keydown', (event) => {
 
 setScene(0);
 setMusicButtonState(false);
+void attemptAutoMusicStart();
+installMusicUnlockListeners();
