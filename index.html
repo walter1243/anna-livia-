@@ -10,82 +10,91 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="progress-bar" aria-hidden="true"></div>
+  <div class="phone-shell">
+    <div class="phone-screen">
+      <div id="progress-bar" aria-hidden="true"></div>
 
-  <div id="indicators" aria-label="Capítulos da história">
-    <button class="dot active" data-go="0" aria-label="Ir para capítulo 1"></button>
-    <button class="dot" data-go="1" aria-label="Ir para capítulo 2"></button>
-    <button class="dot" data-go="2" aria-label="Ir para capítulo 3"></button>
-    <button class="dot" data-go="3" aria-label="Ir para capítulo 4"></button>
+      <div id="indicators" aria-label="Capítulos da história">
+        <button class="dot active" data-go="0" aria-label="Ir para capítulo 1"></button>
+        <button class="dot" data-go="1" aria-label="Ir para capítulo 2"></button>
+        <button class="dot" data-go="2" aria-label="Ir para capítulo 3"></button>
+        <button class="dot" data-go="3" aria-label="Ir para capítulo 4"></button>
+      </div>
+
+      <main id="slideshow">
+        <section class="scene active" id="scene1" data-scene>
+          <img class="scene-img" src="./primeirafoto1.jpeg" alt="Primeira foto da história">
+          <div class="overlay">
+            <div class="heart-deco">🌸</div>
+            <p class="scene-number">CAPÍTULO I</p>
+            <h1 class="scene-title">A História Começa</h1>
+            <p class="scene-text">
+              Às vezes a vida coloca a pessoa certa no caminho mais inesperado.<br>
+              E ali, sem perceber, começava a nossa história —<br>
+              uma história que eu nunca quis que terminasse.
+            </p>
+          </div>
+        </section>
+
+        <section class="scene" id="scene2" data-scene>
+          <img class="scene-img" src="./segundafoto.jpeg" alt="Segunda foto da história">
+          <div class="overlay">
+            <div class="heart-deco">💙</div>
+            <p class="scene-number">CAPÍTULO II</p>
+            <h2 class="scene-title">Os Desafios</h2>
+            <p class="scene-text">
+              A distância foi o nosso maior desafio,<br>
+              mas cada quilômetro que nos separava<br>
+              só fez crescer o que sinto por você.<br>
+              Cada reencontro era como respirar de novo.
+            </p>
+          </div>
+        </section>
+
+        <section class="scene" id="scene3" data-scene>
+          <video class="scene-video" id="mainVideo" preload="metadata" controls playsinline poster="./segundafoto.jpeg">
+            <source src="./WhatsApp Video 2026-05-08 at 17.47.24 (1).mp4" type="video/mp4">
+            Seu navegador não conseguiu abrir o vídeo.
+          </video>
+          <div class="overlay">
+            <div class="heart-deco">🎬</div>
+            <p class="scene-number">CAPÍTULO III</p>
+            <h2 class="scene-title">Nosso Momento</h2>
+            <p class="scene-text">
+              Esse capítulo é nosso em vídeo.<br>
+              Ele vem antes da aliança,<br>
+              exatamente na ordem que você pediu.
+            </p>
+          </div>
+        </section>
+
+        <section class="scene" id="scene4" data-scene>
+          <img class="scene-img" src="./aliança.jpeg" alt="Foto da aliança">
+          <div class="overlay">
+            <div class="heart-deco">💍 ❤️</div>
+            <p class="scene-number">CAPÍTULO IV · O PEDIDO</p>
+            <h2 class="scene-title">Você quer ser minha namorada?</h2>
+            <p class="scene-text">
+              Escolhi cada pedra com amor, porque foi assim que você chegou na minha vida —<br>
+              brilhando de um jeito que iluminou tudo ao redor.<br>
+              Quero ser o seu namorado e estar ao seu lado em cada momento.<br><br>
+              <em>Te amo para sempre.</em> ❤️
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <button id="musicToggle" type="button" aria-pressed="false">Tocar música</button>
+      <audio id="bgMusic" loop preload="metadata">
+        <source src="./Lisboa-AnaVitoria.mp3" type="audio/mpeg">
+      </audio>
+
+      <nav id="nav">
+        <button class="nav-btn" id="prevBtn" type="button">← Anterior</button>
+        <button class="nav-btn" id="nextBtn" type="button">Próximo →</button>
+      </nav>
+    </div>
   </div>
-
-  <main id="slideshow">
-    <section class="scene active" id="scene1" data-scene>
-      <img class="scene-img" src="./primeirafoto1.jpeg" alt="Primeira foto da história">
-      <div class="overlay">
-        <div class="heart-deco">🌸</div>
-        <p class="scene-number">CAPÍTULO I</p>
-        <h1 class="scene-title">A História Começa</h1>
-        <p class="scene-text">
-          Às vezes a vida coloca a pessoa certa no caminho mais inesperado.<br>
-          E ali, sem perceber, começava a nossa história —<br>
-          uma história que eu nunca quis que terminasse.
-        </p>
-      </div>
-    </section>
-
-    <section class="scene" id="scene2" data-scene>
-      <img class="scene-img" src="./segundafoto.jpeg" alt="Segunda foto da história">
-      <div class="overlay">
-        <div class="heart-deco">💙</div>
-        <p class="scene-number">CAPÍTULO II</p>
-        <h2 class="scene-title">Os Desafios</h2>
-        <p class="scene-text">
-          A distância foi o nosso maior desafio,<br>
-          mas cada quilômetro que nos separava<br>
-          só fez crescer o que sinto por você.<br>
-          Cada reencontro era como respirar de novo.
-        </p>
-      </div>
-    </section>
-
-    <section class="scene" id="scene3" data-scene>
-      <video class="scene-video" id="mainVideo" preload="metadata" controls playsinline poster="./segundafoto.jpeg">
-        <source src="./WhatsApp Video 2026-05-08 at 17.47.24 (1).mp4" type="video/mp4">
-        Seu navegador não conseguiu abrir o vídeo.
-      </video>
-      <div class="overlay">
-        <div class="heart-deco">🎬</div>
-        <p class="scene-number">CAPÍTULO III</p>
-        <h2 class="scene-title">Nosso Momento</h2>
-        <p class="scene-text">
-          Esse capítulo é nosso em vídeo.<br>
-          Ele vem antes da aliança,<br>
-          exatamente na ordem que você pediu.
-        </p>
-      </div>
-    </section>
-
-    <section class="scene" id="scene4" data-scene>
-      <img class="scene-img" src="./aliança.jpeg" alt="Foto da aliança">
-      <div class="overlay">
-        <div class="heart-deco">💍 ❤️</div>
-        <p class="scene-number">CAPÍTULO IV · O PEDIDO</p>
-        <h2 class="scene-title">Você quer ser minha namorada?</h2>
-        <p class="scene-text">
-          Escolhi cada pedra com amor, porque foi assim que você chegou na minha vida —<br>
-          brilhando de um jeito que iluminou tudo ao redor.<br>
-          Quero ser o seu namorado e estar ao seu lado em cada momento.<br><br>
-          <em>Te amo para sempre.</em> ❤️
-        </p>
-      </div>
-    </section>
-  </main>
-
-  <nav id="nav">
-    <button class="nav-btn" id="prevBtn" type="button">← Anterior</button>
-    <button class="nav-btn" id="nextBtn" type="button">Próximo →</button>
-  </nav>
 
   <script src="script.js"></script>
 </body>

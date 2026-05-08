@@ -1,28 +1,22 @@
-const startButton = document.getElementById('startButton');
-const storyPanel = document.getElementById('storyPanel');
 const scenes = Array.from(document.querySelectorAll('[data-scene]'));
-const panelNav = document.getElementById('panelNav');
-const progressBar = document.getElementById('progressBar');
-const prevButton = document.getElementById('prevButton');
-const nextButton = document.getElementById('nextButton');
-const replayButton = document.getElementById('replayButton');
+const dots = Array.from(document.querySelectorAll('#indicators .dot'));
+const progressBar = document.getElementById('progress-bar');
+const prevButton = document.getElementById('prevBtn');
+const nextButton = document.getElementById('nextBtn');
+const bgMusic = document.getElementById('bgMusic');
+const musicToggle = document.getElementById('musicToggle');
+const mainVideo = document.getElementById('mainVideo');
+const videoSceneIndex = scenes.findIndex((scene) => scene.contains(mainVideo));
 
-let storyStarted = false;
 let currentScene = 0;
+let musicStartedByGesture = false;
+let wasInVideoScene = false;
 
-function buildDots() {
-  scenes.forEach((_, index) => {
-    const dot = document.createElement('button');
-    dot.type = 'button';
-    dot.className = 'panel-dot';
-    dot.setAttribute('aria-label', `Ir para o capitulo ${index + 1}`);
-    dot.addEventListener('click', () => setScene(index));
-    panelNav.appendChild(dot);
-  });
+function clampScene(index) {
+  return Math.max(0, Math.min(index, scenes.length - 1));
 }
 
 function syncScene() {
-  const dots = Array.from(panelNav.querySelectorAll('.panel-dot'));
   scenes.forEach((scene, index) => {
     scene.classList.toggle('active', index === currentScene);
   });
@@ -31,64 +25,149 @@ function syncScene() {
     dot.classList.toggle('active', index === currentScene);
   });
 
-  const progress = ((currentScene + 1) / scenes.length) * 100;
-  progressBar.style.width = `${progress}%`;
-  prevButton.disabled = currentScene === 0;
-  nextButton.disabled = currentScene === scenes.length - 1;
+  if (progressBar) {
+    const progress = ((currentScene + 1) / scenes.length) * 100;
+    progressBar.style.width = `${progress}%`;
+  }
+
+  if (prevButton) {
+    prevButton.disabled = currentScene === 0;
+  }
+
+  if (nextButton) {
+    nextButton.disabled = currentScene === scenes.length - 1;
+  }
+
+  const inVideoScene = currentScene === videoSceneIndex;
+
+  if (musicToggle) {
+    musicToggle.disabled = inVideoScene;
+  }
+
+  if (inVideoScene) {
+    if (bgMusic && !bgMusic.paused) {
+      bgMusic.pause();
+    }
+
+    if (mainVideo) {
+      mainVideo.muted = false;
+    }
+  } else {
+    if (wasInVideoScene && mainVideo && !mainVideo.paused) {
+      mainVideo.pause();
+    }
+
+    if (bgMusic && musicStartedByGesture) {
+      void tryPlayMusic();
+    }
+  }
+
+  wasInVideoScene = inVideoScene;
 }
 
 function setScene(index) {
-  currentScene = index;
+  currentScene = clampScene(index);
   syncScene();
 }
 
-function openStory() {
-  if (storyStarted) {
+function setMusicButtonState(isPlaying) {
+  if (!musicToggle) {
     return;
   }
 
-  storyStarted = true;
-  document.body.classList.add('intro-open');
-  startButton.setAttribute('aria-expanded', 'true');
-
-  window.setTimeout(() => {
-    document.body.classList.add('story-open');
-    storyPanel.classList.add('visible');
-    setScene(0);
-  }, 450);
+  musicToggle.textContent = isPlaying ? 'Pausar música' : 'Tocar música';
+  musicToggle.classList.toggle('is-playing', isPlaying);
+  musicToggle.setAttribute('aria-pressed', String(isPlaying));
 }
 
-function resetExperience() {
-  storyStarted = false;
-  currentScene = 0;
-  document.body.classList.remove('story-open', 'intro-open');
-  startButton.setAttribute('aria-expanded', 'false');
-  storyPanel.classList.remove('visible');
-  syncScene();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+async function tryPlayMusic() {
+  if (!bgMusic) {
+    return false;
+  }
+
+  try {
+    await bgMusic.play();
+    setMusicButtonState(true);
+    return true;
+  } catch {
+    setMusicButtonState(false);
+    return false;
+  }
 }
 
-startButton.addEventListener('click', openStory);
-prevButton.addEventListener('click', () => setScene(Math.max(0, currentScene - 1)));
-nextButton.addEventListener('click', () => setScene(Math.min(scenes.length - 1, currentScene + 1)));
-replayButton.addEventListener('click', resetExperience);
-
-document.addEventListener('keydown', (event) => {
-  if (!storyStarted) {
-    if (event.key === 'Enter' || event.key === ' ') {
-      openStory();
-    }
+function ensureMusicAfterGesture() {
+  if (musicStartedByGesture || !bgMusic) {
     return;
   }
 
-  if (event.key === 'ArrowRight') {
-    setScene(Math.min(scenes.length - 1, currentScene + 1));
-  }
+  musicStartedByGesture = true;
+  void tryPlayMusic();
+}
 
-  if (event.key === 'ArrowLeft') {
-    setScene(Math.max(0, currentScene - 1));
+if (prevButton) {
+  prevButton.addEventListener('click', () => {
+    ensureMusicAfterGesture();
+    setScene(currentScene - 1);
+  });
+}
+
+if (nextButton) {
+  nextButton.addEventListener('click', () => {
+    ensureMusicAfterGesture();
+    setScene(currentScene + 1);
+  });
+}
+
+dots.forEach((dot) => {
+  const sceneIndex = Number(dot.dataset.go);
+  if (!Number.isNaN(sceneIndex)) {
+    dot.addEventListener('click', () => {
+      ensureMusicAfterGesture();
+      setScene(sceneIndex);
+    });
   }
 });
 
-buildDots();
-syncScene();
+if (musicToggle) {
+  musicToggle.addEventListener('click', async () => {
+    if (!bgMusic) {
+      return;
+    }
+
+    if (bgMusic.paused) {
+      musicStartedByGesture = true;
+      await tryPlayMusic();
+      return;
+    }
+
+    bgMusic.pause();
+    setMusicButtonState(false);
+  });
+}
+
+if (bgMusic) {
+  bgMusic.volume = 0.45;
+  bgMusic.addEventListener('play', () => setMusicButtonState(true));
+  bgMusic.addEventListener('pause', () => setMusicButtonState(false));
+}
+
+if (mainVideo) {
+  mainVideo.addEventListener('play', () => {
+    if (bgMusic && !bgMusic.paused) {
+      bgMusic.pause();
+    }
+  });
+}
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'ArrowRight') {
+    setScene(currentScene + 1);
+  }
+
+  if (event.key === 'ArrowLeft') {
+    setScene(currentScene - 1);
+  }
+});
+
+setScene(0);
+setMusicButtonState(false);
